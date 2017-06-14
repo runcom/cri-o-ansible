@@ -2,58 +2,33 @@
 - hosts: all
   become: true
   tasks:
-    - name: Make sure we have all required packages on Fedora
-      dnf:
+    - name: Make sure we have all required packages on Fedora/RHEL/CentOS
+      package:
         name: "{{ item }}"
         state: latest
       with_items:
-        - wget
-        - git
-        - make
-        - gcc
-        - tar
-        - libseccomp-devel
-        - golang
-        - go-md2man
-        - glib2-devel
-        - glibc-static
-        - container-selinux
         - btrfs-progs-devel
+        - container-selinux
         - device-mapper-devel
+        - gcc
+        - git
+        - glib2-devel
         - glibc-devel
+        - glibc-static
+        - go-md2man
+        - golang
         - gpgme-devel
-        - libassuan-devel
-        - libgpg-error-devel
-        - pkgconfig
-        - skopeo-containers
         - iptables
-      when: ansible_distribution == 'Fedora'
-    - name: Make sure we have all required packages on RHEL/CentOS
-      when: (ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS')
-      yum:
-        name: "{{ item }}"
-        state: latest
-      with_items:
-        - wget
-        - git
-        - make
-        - gcc
-        - tar
-        - libseccomp-devel
-        - golang
-        - go-md2man
-        - glib2-devel
-        - glibc-static
-        - container-selinux
-        - btrfs-progs-devel
-        - device-mapper-devel
-        - glibc-devel
-        - gpgme-devel
+        - json-glib-devel
         - libassuan-devel
         - libgpg-error-devel
+        - libseccomp-devel
+        - make
         - pkgconfig
-        - json-glib-devel
         - skopeo-containers
+        - tar
+        - wget
+      when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
     - name: Update all in Ubuntu
       apt:
         upgrade: dist
