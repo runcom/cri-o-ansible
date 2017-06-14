@@ -49,6 +49,7 @@
         - build-essential
         - curl
         - gawk
+        - git
         - iptables
         - libaio-dev
         - libapparmor-dev
