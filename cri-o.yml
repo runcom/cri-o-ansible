@@ -90,14 +90,14 @@
         insertafter: 'EOF'
         regexp: 'export PATH=\/usr\/local\/go\/bin:\$PATH'
         state: present
-      when: (ansible_distribution == 'Fedora' or ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS')
+      when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
 
     - name: link golang
       file: src=/usr/local/go/bin/go dest=/usr/bin/go state=link
 
     - name: update all in RHEL/CentOS
       yum: name=* state=latest
-      when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
+      when: ansible_distribution in ['RedHat', 'CentOS']
 
     - name: Update all packages on Fedora
       dnf:
@@ -158,7 +158,7 @@
         replace: 'systemd'
         name: /etc/crio/crio.conf
         backup: yes
-      when: (ansible_distribution == 'Fedora' or ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS')
+      when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
 
     - name: run with overlay2
       replace:
@@ -174,7 +174,7 @@
         insertafter: 'storage_option = \['
         regexp: 'overlay2\.override_kernel_check=1'
         state: present
-      when: (ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS')
+      when: ansible_distribution in ['RedHat', 'CentOS']
 
     - name: enable and start CRI-O
       systemd:
@@ -213,8 +213,8 @@
         dest: /etc/selinux/config
         line: 'SELINUX=permissive'
         regexp: '^SELINUX='
-      when: (ansible_distribution == 'Fedora' or ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS')
+      when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
 
     - name: disable selinux
       command: "setenforce 0"
-      when: (ansible_distribution == 'Fedora' or ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS')
+      when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
