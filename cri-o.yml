@@ -36,31 +36,32 @@
         cache_valid_time: 86400 #One day
       when: ansible_distribution == 'Ubuntu'
     - name: Make sure we have all required packages on Ubuntu
-      package:
+      apt:
         name: "{{ item }}"
         state: latest
+        update_cache: yes
       with_items:
         - apt-transport-https
+        - aptitude
+        - btrfs-tools
         - build-essential
         - curl
         - gawk
         - iptables
-        - pkg-config
         - libaio-dev
+        - libapparmor-dev
         - libcap-dev
+        - libdevmapper-dev
+        - libdevmapper1.02.1
+        - libglib2.0-dev
+        - libgpgme11-dev
+        - libjson-glib-dev
         - libprotobuf-dev
-        - libseccomp2
         - libseccomp-dev
+        - libseccomp2
+        - pkg-config
         - protobuf-compiler
         - python-minimal
-        - libglib2.0-dev
-        - libjson-glib-dev
-        - libapparmor-dev
-        - btrfs-tools
-        - libdevmapper1.02.1
-        - libdevmapper-dev
-        - libgpgme11-dev
-        - aptitude
       when: ansible_distribution == 'Ubuntu'
     - name: Make directories
       file:
