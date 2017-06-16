@@ -149,9 +149,10 @@
               make install.config
 
     - name: install policy.json in Ubuntu
-      shell: |
-              cd /root/src/github.com/kubernetes-incubator/cri-o && \
-              cp test/policy.json /etc/containers/policy.json
+      copy:
+        src: /root/src/github.com/kubernetes-incubator/cri-o/test/policy.json
+        dest: /etc/containers/policy.json
+        remote_src: yes
       when: ansible_distribution == 'Ubuntu'
 
     - name: build CNI stuff
@@ -196,21 +197,13 @@
         daemon_reload: yes
 
     - name: modprobe br_netfilter
-      command: "modprobe br_netfilter"
+      modprobe: name=br_netfilter
       ignore_errors: true
 
     - name: tune sysctl
-      lineinfile:
-        line: "net/bridge/bridge-nf-call-iptables = 1"
-        dest: /etc/sysctl.conf
-        insertafter: 'EOF'
-        regexp: '\/net\/bridge\/bridge-nf-call-iptables = 1'
-        state: present
-      ignore_errors: true
-
-    - name: reload sysctl
-      command: "sysctl -p"
-      ignore_errors: true
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
 
     - name: systemd dropin for kubeadm
       copy:
@@ -220,17 +213,12 @@
                   Environment="KUBELET_EXTRA_ARGS=--enable-cri=true --container-runtime=remote --runtime-request-timeout=15m --image-service-endpoint /var/run/crio.sock --container-runtime-endpoint /var/run/crio.sock"
 
     - name: flush iptables
-      command: "iptables -F"
+      iptables: flush=yes
 
     - name: Permanently disable selinux
-      lineinfile:
-        dest: /etc/selinux/config
-        line: 'SELINUX=permissive'
-        regexp: '^SELINUX='
-      when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
-
-    - name: disable selinux
-      command: "setenforce 0"
+      selinux:
+        state: permissive
+        policy: targeted
       when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
 
   handlers:
