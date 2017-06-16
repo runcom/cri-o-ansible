@@ -154,6 +154,7 @@
         name: /etc/crio/crio.conf
         backup: yes
       when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
+      notify: restart crio
 
     - name: run with overlay2
       replace:
@@ -161,6 +162,7 @@
         replace: 'storage_driver = "overlay2"'
         name: /etc/crio/crio.conf
         backup: yes
+      notify: restart crio
 
     - name: add overlay2 storage opts on RHEL/CentOS
       lineinfile:
@@ -170,6 +172,7 @@
         regexp: 'overlay2\.override_kernel_check=1'
         state: present
       when: ansible_distribution in ['RedHat', 'CentOS']
+      notify: restart crio
 
     - name: enable and start CRI-O
       systemd:
@@ -213,3 +216,10 @@
     - name: disable selinux
       command: "setenforce 0"
       when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
+
+  handlers:
+    - name: restart crio
+      systemd:
+        name: crio
+        state: restarted
+        daemon_reload: yes
