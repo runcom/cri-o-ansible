@@ -152,6 +152,7 @@
       shell: |
               cd /root/src/github.com/kubernetes-incubator/cri-o && \
               cp test/policy.json /etc/containers/policy.json
+      when: ansible_distribution == 'Ubuntu'
 
     - name: build CNI stuff
       shell: |
