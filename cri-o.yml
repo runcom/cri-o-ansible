@@ -167,6 +167,7 @@
         name: /etc/crio/crio.conf
         backup: yes
       when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
+      notify: restart crio
 
     - name: run with overlay2
       replace:
@@ -174,6 +175,7 @@
         replace: 'storage_driver = "overlay2"'
         name: /etc/crio/crio.conf
         backup: yes
+      notify: restart crio
 
     - name: add overlay2 storage opts on RHEL/CentOS
       lineinfile:
@@ -183,6 +185,7 @@
         regexp: 'overlay2\.override_kernel_check=1'
         state: present
       when: ansible_distribution in ['RedHat', 'CentOS']
+      notify: restart crio
 
     - name: enable and start CRI-O
       systemd:
@@ -209,9 +212,11 @@
       ignore_errors: true
 
     - name: systemd dropin for kubeadm
-      shell: |
-              sh -c 'echo "[Service]
-              Environment=\"KUBELET_EXTRA_ARGS=--enable-cri=true --container-runtime=remote --runtime-request-timeout=15m --image-service-endpoint /var/run/crio.sock --container-runtime-endpoint /var/run/crio.sock\"" > /etc/systemd/system/kubelet.service.d/0-crio.conf'
+      copy:
+        dest: /etc/systemd/system/kubelet.service.d/0-crio.conf
+        content: |
+                  [Service]
+                  Environment="KUBELET_EXTRA_ARGS=--enable-cri=true --container-runtime=remote --runtime-request-timeout=15m --image-service-endpoint /var/run/crio.sock --container-runtime-endpoint /var/run/crio.sock"
 
     - name: flush iptables
       command: "iptables -F"
@@ -226,3 +231,10 @@
     - name: disable selinux
       command: "setenforce 0"
       when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
+
+  handlers:
+    - name: restart crio
+      systemd:
+        name: crio
+        state: restarted
+        daemon_reload: yes
