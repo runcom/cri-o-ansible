@@ -30,3 +30,4 @@
     - kubeadm
     - kubectl
     - kubernetes-cni
+  when: ansible_distribution != "Fedora"
