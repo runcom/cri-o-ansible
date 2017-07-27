@@ -15,6 +15,7 @@
       with_items:
         - btrfs-progs-devel
         - container-selinux
+        - cri-o
         - device-mapper-devel
         - gcc
         - git
@@ -25,11 +26,13 @@
         - golang
         - gpgme-devel
         - iptables
+        - kubernetes
         - libassuan-devel
         - libgpg-error-devel
         - libseccomp-devel
         - make
         - pkgconfig
+        - runc
         - skopeo-containers
         - tar
         - wget
@@ -135,6 +138,7 @@
               make install && \
               make install.systemd && \
               make install.config
+      when: ansible_distribution != 'Fedora'
 
     - name: install policy.json in Ubuntu
       shell: |
