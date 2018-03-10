@@ -110,7 +110,7 @@
       git:
         repo: https://github.com/kubernetes-incubator/cri-o
         dest: /root/src/github.com/kubernetes-incubator/cri-o
-        version: kube-1.6.x
+        version: release-1.9
 
     - name: clone CNI
       git:
