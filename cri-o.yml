@@ -217,7 +217,7 @@
     - name: systemd dropin for kubeadm
       shell: |
               sh -c 'echo "[Service]
-              Environment=\"KUBELET_EXTRA_ARGS=--enable-cri=true --container-runtime=remote --runtime-request-timeout=15m --image-service-endpoint /var/run/crio.sock --container-runtime-endpoint /var/run/crio.sock\"" > /etc/systemd/system/kubelet.service.d/0-crio.conf'
+              Environment=\"KUBELET_EXTRA_ARGS=--container-runtime=remote --runtime-request-timeout=15m --image-service-endpoint /var/run/crio/crio.sock --container-runtime-endpoint /var/run/crio/crio.sock\"" > /etc/systemd/system/kubelet.service.d/0-crio.conf'
 
     - name: flush iptables
       command: "iptables -F"
