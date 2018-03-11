@@ -232,3 +232,11 @@
     - name: disable selinux
       command: "setenforce 0"
       when: ansible_distribution in ['Fedora', 'RedHat', 'CentOS']
+
+    - name: install crictl
+      shell: |
+              curl -LO https://github.com/kubernetes-incubator/cri-tools/releases/download/v1.0.0-alpha.0/crictl-v1.0.0-alpha.0-linux-amd64.tar.gz
+              tar -xvf crictl-v1.0.0-alpha.0-linux-amd64.tar.gz
+              mv crictl /usr/local/bin/crictl
+              rm crictl-v1.0.0-alpha.0-linux-amd64.tar.gz
+              chmod +x /usr/local/bin/crictl
