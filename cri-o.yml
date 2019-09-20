@@ -35,6 +35,12 @@
         - wget
       when: ansible_distribution == 'Fedora'
 
+    - name: install Epel repository
+      yum:
+        name: epel-release
+        state: latest
+      when: ansible_distribution == 'CentOS'
+
     - name: Make sure we have all required packages on RHEL/CentOS
       yum:
         name: "{{ item }}"
@@ -61,6 +67,16 @@
         - tar
         - wget
       when: ansible_distribution in ['RedHat', 'CentOS']
+
+    - name: Make sure we have all required packages on RHEL
+      yum:
+        name: "go-md2man"
+      when: ansible_distribution == 'RedHat'
+
+    - name: Make sure we have all required packages on CentOS
+      yum:
+        name: "golang-github-cpuguy83-go-md2man"
+      when: ansible_distribution == 'CentOS'
 
     - name: Make sure we have all required packages on Ubuntu
       package:
@@ -110,7 +126,7 @@
       git:
         repo: https://github.com/kubernetes-incubator/cri-o
         dest: /root/src/github.com/kubernetes-incubator/cri-o
-        version: kube-1.6.x
+        version: release-1.16
 
     - name: clone CNI
       git:
@@ -129,12 +145,25 @@
 
     - name: build cri-o
       shell: |
+              export GOPATH=/root && \
+              export GOBIN=/usr/local/go/bin && \
+              export PATH=/usr/local/go/bin:$PATH && \
               cd /root/src/github.com/kubernetes-incubator/cri-o && \
-              make install.tools && \
               make && \
               make install && \
               make install.systemd && \
               make install.config
+
+    - name: clone conmon dependency
+      git:
+        repo: http://github.com/containers/conmon
+        dest: /root/src/github.com/conmon
+  
+    - name: build and install conmon
+      shell: |
+              cd /root/src/github.com/conmon && \
+              make && \
+              make install
 
     - name: install policy.json in Ubuntu
       shell: |
@@ -145,7 +174,7 @@
     - name: build CNI stuff
       shell: |
               cd /root/src/github.com/containernetworking/plugins && \
-              ./build.sh && \
+              ./build_linux.sh && \
               mkdir -p /opt/cni/bin && \
               cp bin/* /opt/cni/bin/
 
@@ -159,15 +188,22 @@
 
     - name: run with overlay2
       replace:
-        regexp: 'storage_driver = ""'
+        regexp: '^#storage_driver = "overlay"'
         replace: 'storage_driver = "overlay2"'
+        name: /etc/crio/crio.conf
+        backup: yes
+
+    - name: change cgroup_manager to cgroupfs
+      replace:
+        regexp: '^cgroup_manager = "systemd"'
+        replace: 'cgroup_manager = "cgroupfs"'
         name: /etc/crio/crio.conf
         backup: yes
 
     - name: add overlay2 storage opts on RHEL/CentOS
       lineinfile:
         dest: /etc/crio/crio.conf
-        line: '"overlay2.override_kernel_check=1"'
+        line: 'storage_option = [ "overlay2.override_kernel_check=1" ]'
         insertafter: 'storage_option = \['
         regexp: 'overlay2\.override_kernel_check=1'
         state: present

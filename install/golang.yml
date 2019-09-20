@@ -7,10 +7,10 @@
 
 - name: install Golang upstream
   unarchive:
-    src: "https://golang.org/dl/go1.8.3.linux-amd64.tar.gz"
+    src: "https://golang.org/dl/go1.13.linux-amd64.tar.gz"
     dest: "/usr/local"
     remote_src: True
-  when: '"go1.8.3" not in go_version.stdout'
+  when: '"go1.13" not in go_version.stdout'
 
 - name: Set custom Golang path in RHEL/CentOS/Fedora
   lineinfile:
