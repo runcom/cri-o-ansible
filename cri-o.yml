@@ -250,10 +250,23 @@
       command: "sysctl -p"
       ignore_errors: true
 
+    - name: kubelet_extra_args copied to /etc/default/kubelet
+      copy:
+        content: "KUBELET_EXTRA_ARGS=--feature-gates=\"AllAlpha=false,RunAsGroup=true\" --container-runtime=remote --cgroup-driver=cgroupfs --container-runtime-endpoint='unix:///var/run/crio/crio.sock' --runtime-request-timeout=5m"
+        force: yes
+        dest: /etc/default/kubelet
+
     - name: systemd dropin for kubeadm
-      shell: |
-              sh -c 'echo "[Service]
-              Environment=\"KUBELET_EXTRA_ARGS=--enable-cri=true --container-runtime=remote --runtime-request-timeout=15m --image-service-endpoint /var/run/crio.sock --container-runtime-endpoint /var/run/crio.sock\"" > /etc/systemd/system/kubelet.service.d/0-crio.conf'
+      copy:
+        content: |
+              [Service]
+              Environment=-/etc/default/kubelet
+        dest: /etc/systemd/system/kubelet.service.d/0-crio.conf
+        force: yes
+
+    - name: just force systemd to reread configs
+      systemd:
+        daemon_reload: yes
 
     - name: flush iptables
       command: "iptables -F"
